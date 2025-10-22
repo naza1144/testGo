@@ -80,6 +80,12 @@ func main() {
 
 	// Middleware
 	app.Use(loggingMiddleware)
+
+	// ปิดการเก็บแคชสำหรับไฟล์ static ระหว่าง dev
+	app.Use("/static", func(c *fiber.Ctx) error {
+		c.Set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+		return c.Next()
+	})
 	
     app.Static("/static", "./static")
 

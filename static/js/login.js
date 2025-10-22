@@ -1,19 +1,23 @@
-async function  login(event) {
+async function login(event) {
     event.preventDefault();
-    const username = document.querySelector('username').value.trim();
-    const password = document.querySelector('password').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
 
-    const res = await fetch('/api/users/login', {
-        metod: 'POST',
+    const res = await fetch('/api/login', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
     });
 
-    const data = await res.json();
-
-    if (data.status == "ok") {
-        window.location.href = "/templates/page/succes";
+    if (res.ok) {
+        // redirect to home or success page
+        window.location.href = "/templates/succes.html";
     } else {
-        alert("❌ อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "❌ อีเมลหรือรหัสผ่านไม่ถูกต้อง");
     }
 }
+
+// attach listener (ensure form exists)
+const form = document.querySelector('form');
+if (form) form.addEventListener('submit', login);
