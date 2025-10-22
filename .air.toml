@@ -1,0 +1,12 @@
+# Root directory ของโปรเจกต์
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# สั่ง build ไปที่โฟลเดอร์ที่มี func main()
+cmd = "go build -o ./tmp/main.exe ./database"
+bin = "tmp/main.exe"
+delay = 1000
+
+[log]
+time = true
