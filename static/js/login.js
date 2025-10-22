@@ -9,7 +9,7 @@ async function  login(event) {
         body: JSON.stringify({ username, password }),
     });
 
-    const data = await Response.json();
+    const data = await res.json();
 
     if (data.status == "ok") {
         window.location.href = "/templates/page/succes";

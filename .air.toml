@@ -7,6 +7,7 @@ tmp_dir = "tmp"
 cmd = "go build -o ./tmp/main.exe ./database"
 bin = "tmp/main.exe"
 delay = 1000
+include_ext = ["go", "tpl", "html", "js", "css"]
 
 [log]
 time = true
