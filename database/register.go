@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,6 +11,10 @@ import (
 )
 
 func registerUser(c *fiber.Ctx) error {
+	// log raw body for debugging
+	body := c.Body()
+	log.Printf("register raw body: %s\n", string(body))
+
 	var user userdatabase
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot parse JSON"})

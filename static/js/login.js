@@ -11,7 +11,7 @@ async function login(event) {
 
     if (res.ok) {
         // redirect to home or success page
-        window.location.href = "/templates/succes.html";
+        window.location.href = "succes";
     } else {
         const data = await res.json().catch(() => ({}));
         alert(data.error || "❌ อีเมลหรือรหัสผ่านไม่ถูกต้อง");
