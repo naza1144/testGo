@@ -2,42 +2,47 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
-	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type userdatabase struct {
-	ID       primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Name     string             `bson:"name" json:"name"`
-	Email    string             `bson:"email" json:"email"`
-	Password string             `bson:"password,omitempty" json:"password,omitempty"`
+	ID         primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name       string             `bson:"name" json:"name"`
+	Email      string             `bson:"email" json:"email"`
+	Password   string             `bson:"password,omitempty" json:"password,omitempty"`
+	LastActive time.Time          `bson:"last_active,omitempty" json:"last_active,omitempty"`
 }
 
 var userCol *mongo.Collection
 
 func loggingMiddleware(c *fiber.Ctx) error {
-  // Start timer
-  start := time.Now()
+	start := time.Now()
+	err := c.Next()
+	latency := time.Since(start)
+	log.Printf("%s %s %d %s\n", c.Method(), c.Path(), c.Response().StatusCode(), latency)
+	return err
+}
 
-  // Process request
-  err := c.Next()
-
-  // Calculate processing time
-  duration := time.Since(start)
-
-  // Log the information
-  fmt.Printf("Request URL: %s - Method: %s - Duration: %s\n", c.OriginalURL(), c.Method(), duration)
-
-  return err
+// middleware ที่อัปเดต last_active หากเจอ cookie user_email
+func updateLastActive(c *fiber.Ctx) error {
+	email := c.Cookies("user_email")
+	if email != "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		_, _ = userCol.UpdateOne(ctx, bson.M{"email": email}, bson.M{"$set": bson.M{"last_active": time.Now()}})
+	}
+	return c.Next()
 }
 
 func main() {
@@ -81,18 +86,22 @@ func main() {
 	// Middleware
 	app.Use(loggingMiddleware)
 
+	// อัปเดต last_active ถ้ามี cookie ของ user
+	app.Use(updateLastActive)
+
 	// ปิดการเก็บแคชสำหรับไฟล์ static ระหว่าง dev
 	app.Use("/static", func(c *fiber.Ctx) error {
 		c.Set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
 		return c.Next()
 	})
-	
-    app.Static("/static", "./static")
+
+	app.Static("/static", "./static")
 
 	// Routes
 	app.Post("/api/register", registerUser)
 	app.Post("/api/login", loginUser)
 	app.Get("/api/users", allUsers)
+	app.Get("/api/status", userStatus)
 
 	app.Get("/:page", func(c *fiber.Ctx) error {
 		page := c.Params("page")
@@ -105,7 +114,7 @@ func main() {
 
 	log.Println("Server running on http://localhost:3000")
 	log.Fatal(app.Listen(":3000"))
-	
+
 }
 
 // nodemon --exec go run . --signal SIGTERM

@@ -26,7 +26,7 @@ async function register(event) {
     const bodyText = await res.text();
     console.log("response body:", bodyText);
 
-    if (res.ok) window.location.href = "succes";
+    if (res.ok) window.location.href = "login";
     else {
       let data = {};
       try { data = JSON.parse(bodyText); } catch {}
