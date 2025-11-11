@@ -6,8 +6,125 @@
     <title>Admin page</title>
 </head>
 <body>
-    <h1>Admin Page</h1>
-    <p>Welcome to the admin dashboard.</p>
-    join us
+    <header class="admin-header">
+        <h1>Admin Dashboard</h1>
+        <p class="subtitle">Overview · Users · Settings</p>
+    </header>
+
+    <nav class="admin-nav" aria-label="Main">
+        <button class="nav-btn active" data-section="overview">Overview</button>
+        <button class="nav-btn" data-section="users">Users</button>
+        <button class="nav-btn" data-section="settings">Settings</button>
+    </nav>
+
+    <main class="admin-main">
+        <section id="overview" class="panel">
+            <div class="cards">
+                <div class="card">
+                    <div class="num">128</div>
+                    <div class="label">Total Users</div>
+                </div>
+                <div class="card">
+                    <div class="num">97</div>
+                    <div class="label">Active Today</div>
+                </div>
+                <div class="card">
+                    <div class="num">3</div>
+                    <div class="label">Open Reports</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="users" class="panel" style="display:none;">
+            <h2>Users</h2>
+            <table class="users-table">
+                <thead>
+                    <tr><th>Name</th><th>Email</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Alice Johnson</td>
+                        <td>alice@example.com</td>
+                        <td><span class="status active">Active</span></td>
+                        <td>
+                            <button class="btn small" data-action="edit">Edit</button>
+                            <button class="btn small warn" data-action="suspend">Suspend</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Bob Smith</td>
+                        <td>bob@example.com</td>
+                        <td><span class="status suspended">Suspended</span></td>
+                        <td>
+                            <button class="btn small" data-action="edit">Edit</button>
+                            <button class="btn small" data-action="activate">Activate</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="settings" class="panel" style="display:none;">
+            <h2>Settings</h2>
+            <p>Basic site settings and maintenance tasks.</p>
+            <button class="btn" id="clear-cache">Clear Cache</button>
+        </section>
+    </main>
+
+    <footer class="admin-footer">
+        <small>© Admin Panel</small>
+    </footer>
+
+    <style>
+        .admin-header { padding:16px 0; border-bottom:1px solid #eee; }
+        .admin-header h1 { margin:0; font-size:1.25rem; }
+        .subtitle { color:#666; margin:4px 0 0; font-size:0.9rem; }
+
+        .admin-nav { margin:12px 0; display:flex; gap:8px; }
+        .nav-btn { padding:8px 12px; border:1px solid #ddd; background:#fafafa; cursor:pointer; border-radius:4px; }
+        .nav-btn.active { background:#0078d4; color:#fff; border-color:#0078d4; }
+
+        .admin-main { padding:12px 0; }
+        .cards { display:flex; gap:12px; margin-bottom:16px; }
+        .card { flex:1; padding:12px; background:#fff; border:1px solid #eee; border-radius:6px; text-align:center; }
+        .card .num { font-size:1.5rem; font-weight:600; }
+        .card .label { color:#666; font-size:0.9rem; }
+
+        .users-table { width:100%; border-collapse:collapse; }
+        .users-table th, .users-table td { padding:8px 10px; border-bottom:1px solid #f0f0f0; text-align:left; }
+        .btn { padding:6px 10px; border:1px solid #ccc; background:#fff; border-radius:4px; cursor:pointer; }
+        .btn.small { padding:4px 8px; font-size:0.9rem; }
+        .btn.warn { border-color:#d9534f; color:#d9534f; }
+        .status.active { color:green; font-weight:600; }
+        .status.suspended { color:#d9534f; font-weight:600; }
+
+        .admin-footer { margin-top:18px; color:#888; font-size:0.85rem; }
+    </style>
+
+    <script>
+        // simple nav
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+                btn.classList.add('active');
+                const section = btn.dataset.section;
+                document.querySelectorAll('.panel').forEach(p => p.style.display = p.id === section ? '' : 'none');
+            });
+        });
+
+        // action buttons
+        document.querySelectorAll('[data-action]').forEach(b => {
+            b.addEventListener('click', (e) => {
+                const action = e.currentTarget.dataset.action;
+                if (action === 'suspend' && !confirm('Suspend this user?')) return;
+                if (action === 'activate' && !confirm('Activate this user?')) return;
+                alert('Action: ' + action);
+            });
+        });
+
+        document.getElementById('clear-cache')?.addEventListener('click', () => {
+            if (confirm('Clear site cache?')) alert('Cache cleared.');
+        });
+    </script>
 </body>
 </html>
