@@ -28,6 +28,11 @@ func registerUser(c *fiber.Ctx) error {
 
 	user.Password = string(hash)
 
+	// ตั้ง role เป็น "user" เป็นค่าเริ่มต้น ถ้าว่างเปล่า
+	if user.Role == "" {
+		user.Role = "user"
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	res, err := userCol.InsertOne(ctx, user)

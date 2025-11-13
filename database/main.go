@@ -21,6 +21,7 @@ type userdatabase struct {
 	Name       string             `bson:"name" json:"name"`
 	Email      string             `bson:"email" json:"email"`
 	Password   string             `bson:"password,omitempty" json:"password,omitempty"`
+	Role       string             `bson:"role,omitempty" json:"role,omitempty"`
 	LastActive time.Time          `bson:"last_active,omitempty" json:"last_active,omitempty"`
 }
 
@@ -78,7 +79,8 @@ func main() {
 	userCol = client.Database(dbName).Collection("userdatabase")
 
 	// Fiber app
-	engine := html.New("D:/code all/testGo/template", ".html")
+	// Use a relative path so the app can find templates regardless of absolute drive/path
+	engine := html.New("./template", ".html")
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
@@ -98,10 +100,16 @@ func main() {
 	app.Static("/static", "./static")
 
 	// Routes
+	app.Get("/admin", AdminOnly, func(c *fiber.Ctx) error {
+		return c.Render("admin", fiber.Map{})
+	})
 	app.Post("/api/register", registerUser)
 	app.Post("/api/login", loginUser)
-	app.Get("/api/users", allUsers)
 	app.Get("/api/status", userStatus)
+
+	// Admin routes — ต้องมี secret key ใน query string
+	app.Post("/api/admin/register", CreateAdminUser) // สมัครสมาชิก admin
+	app.Post("/api/admin/promote", PromoteToAdmin)   // ยกระดับ user เป็น admin
 
 	app.Get("/:page", func(c *fiber.Ctx) error {
 		page := c.Params("page")
